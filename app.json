@@ -1,7 +1,7 @@
 {
   "expo": {
     "name": "fish-feed-control",
-    "slug": "fish-feed-control",
+    "slug": "fish-feeder",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
@@ -24,6 +24,12 @@
     },
     "web": {
       "favicon": "./assets/favicon.png"
-    }
+    },
+    "extra": {
+      "eas": {
+        "projectId": "9c1e886b-d53e-4dc2-a524-ae987ec1bad6"
+      }
+    },
+    "owner": "jineshbhaskaran"
   }
 }
