@@ -14,18 +14,6 @@ export const NeumorphicCard = ({ children, className = '', radius = 50, pressed 
             pressed && styles.surfacePressed,
           ]}
         >
-          {pressed && (
-            <>
-              <View
-                pointerEvents="none"
-                style={[styles.insetTopShade, { borderTopLeftRadius: radius, borderTopRightRadius: radius }]}
-              />
-              <View
-                pointerEvents="none"
-                style={[styles.insetBottomLine, { borderBottomLeftRadius: radius, borderBottomRightRadius: radius }]}
-              />
-            </>
-          )}
           {children}
         </View>
       </View>
@@ -70,24 +58,10 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
   },
   surfacePressed: {
-    borderColor: '#e2e2e2',
-  },
-  insetTopShade: {
-    position: 'absolute',
-    top: 0,
-    left: 1,
-    right: 1,
-    height: 14,
-    backgroundColor: 'rgba(0,0,0,0.1)',
-    filter: 'blur(10px)',
-
-  },
-  insetBottomLine: {
-    position: 'absolute',
-    left: 1,
-    right: 1,
-    bottom: 0,
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.8)',
+    borderWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.07)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.04)',
+    borderRightColor: 'rgba(0, 0, 0, 0.04)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.02)',
   },
 });

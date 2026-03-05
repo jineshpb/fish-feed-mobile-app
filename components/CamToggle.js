@@ -33,9 +33,10 @@ export const CamToggle = ({
     >
       <Text className="text-[12px] text-[#bebebe] uppercase">{label}</Text>
       <Pressable
-        className={`w-[69px] h-[53px] rounded-[20px] p-[5px] justify-center flex flex-col ${
+        className={`w-[69px] h-[53px] rounded-[20px] p-[5px] flex flex-col ${
           isOn ? 'bg-[#e7f6ec]' : 'bg-[#f1f1f1]'
         }`}
+        style={styles.trackInnerShadow}
         onPress={handlePress}
         accessibilityLabel={`Toggle camera, currently ${isOn ? 'on' : 'off'}`}
         accessibilityRole="switch"
@@ -43,8 +44,11 @@ export const CamToggle = ({
         accessibilityHint="Double tap to switch camera mode"
       >
         <View
-          className={`h-[27px] w-full bg-white rounded-[32px] ${isOn ? 'self-end' : 'self-start'}`}
-          style={styles.thumbShadow}
+          className="h-[27px] w-full bg-white rounded-[32px]"
+          style={[
+            styles.thumbShadow,
+            isOn ? { marginTop: 'auto' } : { marginBottom: 'auto' },
+          ]}
         >
           <Text style={styles.stateText}>{isOn ? 'ON' : 'OFF'}</Text>
         </View>
@@ -60,6 +64,13 @@ const styles = StyleSheet.create({
     shadowOpacity: 0.09,
     shadowRadius: 4,
     elevation: 4,
+  },
+  trackInnerShadow: {
+    borderWidth: 1,
+    borderTopColor: 'rgba(0, 0, 0, 0.12)',
+    borderLeftColor: 'rgba(0, 0, 0, 0.06)',
+    borderRightColor: 'rgba(0, 0, 0, 0.06)',
+    borderBottomColor: 'rgba(0, 0, 0, 0.03)',
   },
   thumbShadow: {
     shadowColor: '#000',
