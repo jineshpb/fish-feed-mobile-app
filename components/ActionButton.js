@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { ActivityIndicator, StyleSheet, Text, View, Pressable } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { NeumorphicCard } from './NeumorphicCard';
 
@@ -9,55 +9,79 @@ const ICON_MAP = {
   click: 'camera-outline',
 };
 
+export const ACTION_BUTTON_VARIANT = { push: 'push', toggle: 'toggle' };
+
 export const ActionButton = ({
   label = 'feed',
   iconKey = 'feed',
+  variant = ACTION_BUTTON_VARIANT.toggle,
   defaultActive = false,
   active,
+  forceActive = false,
+  surfaceActive,
+  ledActive,
+  loading = false,
   onActiveChange,
   onPress,
 }) => {
   const [internalActive, setInternalActive] = useState(defaultActive);
   const [isPressed, setIsPressed] = useState(false);
+  const isPush = variant === ACTION_BUTTON_VARIANT.push;
   const isControlled = typeof active === 'boolean';
-  const isActive = isControlled ? active : internalActive;
+  const isActive = isPush ? false : (isControlled ? active : internalActive);
+  const defaultSurfaceActive = forceActive || (isPush ? isPressed : isActive);
+  const computedSurfaceActive =
+    typeof surfaceActive === 'boolean' ? surfaceActive : defaultSurfaceActive;
+  const computedLedActive =
+    typeof ledActive === 'boolean' ? ledActive : computedSurfaceActive;
   const iconName = ICON_MAP[iconKey] ?? ICON_MAP.feed;
-  const iconColor = isActive ? '#bdbdbd' : '#d2d2d2';
+  const iconColor = computedSurfaceActive ? '#bdbdbd' : '#d2d2d2';
 
-  const handlePress = () => {
+  const handlePress = async () => {
+    if (loading) return;
+
+    if (isPush) {
+      await onPress?.();
+      return;
+    }
+
     const nextValue = !isActive;
 
     if (!isControlled) {
       setInternalActive(nextValue);
     }
 
-    if (onActiveChange) {
-      onActiveChange(nextValue);
-    }
-
-    if (onPress) {
-      onPress(nextValue);
-    }
+    onActiveChange?.(nextValue);
+    await onPress?.(nextValue);
   };
 
   return (
-    <NeumorphicCard className="flex-1 min-w-[100px] h-[274px]" radius={96} pressed={isActive}>
+    <NeumorphicCard
+      className="flex-1 min-w-[100px] h-[274px]"
+      radius={96}
+      pressed={computedSurfaceActive}
+    >
       <Pressable
         className="flex-1 rounded-[96px] px-6 pt-8 pb-5 items-center justify-between"
         style={isPressed ? styles.buttonPressed : undefined}
         onPress={handlePress}
-        onPressIn={() => setIsPressed(true)}
+        onPressIn={() => !loading && setIsPressed(true)}
         onPressOut={() => setIsPressed(false)}
-        accessibilityLabel={`${label} toggle`}
-        accessibilityRole="switch"
-        accessibilityState={{ checked: isActive }}
+        disabled={loading}
+        accessibilityLabel={isPush ? `${label} button` : `${label} toggle`}
+        accessibilityRole={isPush ? 'button' : 'switch'}
+        accessibilityState={isPush ? { busy: loading } : { checked: computedLedActive, busy: loading }}
       >
         <View
-          className={`w-[17px] h-[17px] rounded-full ${isActive ? 'bg-[#47dd5e]' : 'bg-[#cecece]'}`}
-          style={[styles.dotShadow, isActive && styles.dotActiveShadow]}
+          className={`w-[17px] h-[17px] rounded-full ${computedLedActive ? 'bg-[#47dd5e]' : 'bg-[#cecece]'}`}
+          style={[styles.dotShadow, computedLedActive && styles.dotActiveShadow]}
         />
         <View className="items-center gap-2">
-          <Ionicons name={iconName} size={24} color={iconColor} />
+          {loading ? (
+            <ActivityIndicator size="small" color={iconColor} />
+          ) : (
+            <Ionicons name={iconName} size={24} color={iconColor} />
+          )}
           <Text className="text-[12px] text-[#d2d2d2]">{label}</Text>
         </View>
       </Pressable>
