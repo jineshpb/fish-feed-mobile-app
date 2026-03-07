@@ -5,3 +5,4 @@ export { LastFeedText } from './LastFeedText';
 export { ActionButton } from './ActionButton';
 export { ActionBar } from './ActionBar';
 export { NeumorphicCard } from './NeumorphicCard';
+export { MonoText } from './MonoText';

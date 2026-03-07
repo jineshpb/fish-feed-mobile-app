@@ -1,7 +1,9 @@
-import { useState } from 'react';
-import { StyleSheet, Text, View, Pressable } from 'react-native';
+import { useState } from "react";
+import { StyleSheet, View, Pressable } from "react-native";
+import { COLORS } from "../theme/colors";
+import { MonoText } from "./MonoText";
 
-const LABEL = 'Cam toggle';
+const LABEL = "Cam toggle";
 
 export const CamToggle = ({
   label = LABEL,
@@ -10,7 +12,7 @@ export const CamToggle = ({
   onValueChange,
 }) => {
   const [internalValue, setInternalValue] = useState(defaultValue);
-  const isControlled = typeof value === 'boolean';
+  const isControlled = typeof value === "boolean";
   const isOn = isControlled ? value : internalValue;
 
   const handlePress = () => {
@@ -27,53 +29,78 @@ export const CamToggle = ({
 
   return (
     <View
-      className="flex-row items-center justify-between bg-white w-full py-2 pl-4 pr-2 rounded-3xl mb-[10px]"
-      style={styles.containerShadow}
-      accessibilityLabel={`${label}, ${isOn ? 'on' : 'off'}`}
+      className="flex-row items-center justify-between w-full rounded-3xl mt-4"
+      style={[styles.containerSurface, styles.containerHighlight]}
+      accessibilityLabel={`${label}, ${isOn ? "on" : "off"}`}
     >
-      <Text className="text-[12px] text-[#bebebe] uppercase">{label}</Text>
-      <Pressable
-        className={`w-[69px] h-[53px] rounded-[20px] p-[5px] flex flex-col ${
-          isOn ? 'bg-[#e7f6ec]' : 'bg-[#f1f1f1]'
-        }`}
-        style={styles.trackInnerShadow}
-        onPress={handlePress}
-        accessibilityLabel={`Toggle camera, currently ${isOn ? 'on' : 'off'}`}
-        accessibilityRole="switch"
-        accessibilityState={{ checked: isOn }}
-        accessibilityHint="Double tap to switch camera mode"
+      <View
+        className="flex-row items-center justify-between w-full py-2 pl-6 pr-2 rounded-3xl"
+        style={[styles.containerSurface, styles.containerShadow]}
       >
-        <View
-          className="h-[27px] w-full bg-white rounded-[32px]"
-          style={[
-            styles.thumbShadow,
-            isOn ? { marginTop: 'auto' } : { marginBottom: 'auto' },
-          ]}
+        <MonoText className="text-[12px] uppercase" style={styles.labelText}>
+          {label}
+        </MonoText>
+        <Pressable
+          className="w-[69px] h-[53px] rounded-[20px] p-[5px] flex flex-col"
+          style={[styles.trackBackground, styles.trackInnerShadow]}
+          onPress={handlePress}
+          accessibilityLabel={`Toggle camera, currently ${isOn ? "on" : "off"}`}
+          accessibilityRole="switch"
+          accessibilityState={{ checked: isOn }}
+          accessibilityHint="Double tap to switch camera mode"
         >
-          <Text style={styles.stateText}>{isOn ? 'ON' : 'OFF'}</Text>
-        </View>
-      </Pressable>
+          <View
+            className="h-[27px] w-full rounded-[32px]"
+            style={[
+              styles.thumbBackground,
+              styles.thumbShadow,
+              isOn ? { marginTop: "auto" } : { marginBottom: "auto" },
+            ]}
+          >
+            <MonoText style={styles.stateText}>{isOn ? "ON" : "OFF"}</MonoText>
+          </View>
+        </Pressable>
+      </View>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  containerSurface: {
+    backgroundColor: COLORS.skeuo.panelSurface,
+  },
+  labelText: {
+    color: COLORS.skeuo.labelText,
+  },
   containerShadow: {
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 4 },
-    shadowOpacity: 0.09,
+    shadowColor: COLORS.base.black,
+    shadowOffset: { width: 2, height: 2 },
+    shadowOpacity: 0.45,
+    shadowRadius: 8,
+    elevation: 4,
+  },
+  containerHighlight: {
+    shadowColor: COLORS.base.white,
+    shadowOffset: { width: -2, height: -3 },
+    shadowOpacity: 0.125,
     shadowRadius: 4,
     elevation: 4,
   },
+  trackBackground: {
+    backgroundColor: COLORS.skeuo.trackSurface,
+  },
   trackInnerShadow: {
     borderWidth: 1,
-    borderTopColor: 'rgba(0, 0, 0, 0.12)',
-    borderLeftColor: 'rgba(0, 0, 0, 0.06)',
-    borderRightColor: 'rgba(0, 0, 0, 0.06)',
-    borderBottomColor: 'rgba(0, 0, 0, 0.03)',
+    borderTopColor: "rgba(0, 0, 0, 0.12)",
+    borderLeftColor: "rgba(0, 0, 0, 0.06)",
+    borderRightColor: "rgba(0, 0, 0, 0.06)",
+    borderBottomColor: "rgba(0, 0, 0, 0.03)",
+  },
+  thumbBackground: {
+    backgroundColor: COLORS.skeuo.panelSurface,
   },
   thumbShadow: {
-    shadowColor: '#000',
+    shadowColor: COLORS.base.black,
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.05,
     shadowRadius: 3,
@@ -81,9 +108,9 @@ const styles = StyleSheet.create({
   },
   stateText: {
     fontSize: 9,
-    color: '#a9a9a9',
-    textAlign: 'center',
-    fontWeight: '600',
+    color: COLORS.skeuo.labelText,
+    textAlign: "center",
+    fontWeight: "600",
     lineHeight: 27,
   },
 });

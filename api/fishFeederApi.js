@@ -24,8 +24,16 @@ const callWebhook = async (path, options = {}) => {
     };
 
     const response = await fetch(url, fetchOptions);
+    const rawText = await response.text();
 
-    const data = await response.json().catch(() => ({}));
+    let data = {};
+    if (rawText) {
+      try {
+        data = JSON.parse(rawText);
+      } catch {
+        data = rawText;
+      }
+    }
 
     if (!response.ok) {
       const msg = data?.message ?? data?.error ?? `HTTP ${response.status}`;
@@ -64,6 +72,9 @@ export const getSnapshot = () =>
   callWebhook(N8N_WEBHOOK_PATHS.snapshot, { method: "GET" });
 
 export const cameraClick = () => getSnapshot();
+
+export const getFishStatus = () =>
+  callWebhook(N8N_WEBHOOK_PATHS.status, { method: "GET" });
 
 export const toggleCamera = (isOn) =>
   callWebhook(N8N_WEBHOOK_PATHS.cameraToggle, {

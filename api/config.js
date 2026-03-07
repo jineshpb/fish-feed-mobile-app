@@ -50,6 +50,7 @@ export const getN8nBaseUrl = () => {
 export const N8N_WEBHOOK_PATHS = {
   feed: extra.n8nWebhookPaths?.feed ?? 'feed',
   lights: extra.n8nWebhookPaths?.lights ?? 'lights',
+  status: extra.n8nWebhookPaths?.status ?? 'status',
   cameraClick: extra.n8nWebhookPaths?.cameraClick ?? 'camera-click',
   cameraToggle: extra.n8nWebhookPaths?.cameraToggle ?? 'camera-toggle',
   snapshot:

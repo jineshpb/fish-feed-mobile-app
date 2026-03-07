@@ -1,23 +1,31 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, View } from 'react-native';
-import { ActionButton } from './ActionButton';
-import { feedFish, toggleLights, cameraClick } from '../api/fishFeederApi';
+import { useCallback, useEffect, useRef, useState } from "react";
+import { Alert, View } from "react-native";
+import { ActionButton } from "./ActionButton";
+import {
+  feedFish,
+  toggleLights,
+  cameraClick,
+  getFishStatus,
+} from "../api/fishFeederApi";
 
 const RECONCILE_INTERVAL_MS = 10000;
 const POST_TOGGLE_RECONCILE_DELAY_MS = 700;
 
 const showError = (result, fallback) => {
-  if (result.ok || result.error === 'API not configured') return;
+  if (result.ok || result.error === "API not configured") return;
   const msg = result.url
     ? `${result.error ?? fallback}\n\nURL: ${result.url}`
-    : result.error ?? fallback;
-  Alert.alert('Error', msg);
+    : (result.error ?? fallback);
+  Alert.alert("Error", msg);
 };
 
 export const ActionBar = ({ onDebugUpdate }) => {
   const [lightsActive, setLightsActive] = useState(false);
   const [lightsSurfaceActive, setLightsSurfaceActive] = useState(false);
-  const [successFlash, setSuccessFlash] = useState({ feed: false, click: false });
+  const [successFlash, setSuccessFlash] = useState({
+    feed: false,
+    click: false,
+  });
   const [loadingState, setLoadingState] = useState({
     feed: false,
     lights: false,
@@ -43,15 +51,15 @@ export const ActionBar = ({ onDebugUpdate }) => {
   };
 
   const parseBooleanLike = (value) => {
-    if (typeof value === 'boolean') return value;
-    if (typeof value === 'number') {
+    if (typeof value === "boolean") return value;
+    if (typeof value === "number") {
       if (value === 1) return true;
       if (value === 0) return false;
     }
-    if (typeof value === 'string') {
+    if (typeof value === "string") {
       const normalized = value.trim().toLowerCase();
-      if (['true', 'on', 'enabled', '1'].includes(normalized)) return true;
-      if (['false', 'off', 'disabled', '0'].includes(normalized)) return false;
+      if (["true", "on", "enabled", "1"].includes(normalized)) return true;
+      if (["false", "off", "disabled", "0"].includes(normalized)) return false;
     }
     return null;
   };
@@ -87,7 +95,7 @@ export const ActionBar = ({ onDebugUpdate }) => {
         }
         return null;
       }
-      if (typeof value === 'object') {
+      if (typeof value === "object") {
         for (const [key, nestedValue] of Object.entries(value)) {
           if (/(led|light)/i.test(key)) {
             const parsed = parseBooleanLike(nestedValue);
@@ -105,16 +113,16 @@ export const ActionBar = ({ onDebugUpdate }) => {
     return scanRecursive(payload);
   };
 
-  const reconcileLightsFromSnapshot = useCallback(async (source) => {
-    const result = await cameraClick();
-    pushDebug(`snapshot-${source}`, result);
+  const reconcileLightsFromStatus = useCallback(async (source) => {
+    const result = await getFishStatus();
+    pushDebug(`status-${source}`, result);
     if (!(result.ok && result.status === 200)) return;
 
-    const snapshotLightsState = extractLightsStateFromSnapshot(result.data);
-    if (typeof snapshotLightsState !== 'boolean') return;
+    const statusLightsState = extractLightsStateFromSnapshot(result.data);
+    if (typeof statusLightsState !== "boolean") return;
 
-    setLightsActive(snapshotLightsState);
-    setLightsSurfaceActive(snapshotLightsState);
+    setLightsActive(statusLightsState);
+    setLightsSurfaceActive(statusLightsState);
   }, []);
 
   const schedulePostToggleReconcile = useCallback(() => {
@@ -123,21 +131,21 @@ export const ActionBar = ({ onDebugUpdate }) => {
     }
 
     reconcileTimeoutRef.current = setTimeout(() => {
-      reconcileLightsFromSnapshot('post-toggle');
+      reconcileLightsFromStatus("post-toggle");
     }, POST_TOGGLE_RECONCILE_DELAY_MS);
-  }, [reconcileLightsFromSnapshot]);
+  }, [reconcileLightsFromStatus]);
 
   useEffect(() => {
-    reconcileLightsFromSnapshot('initial');
+    reconcileLightsFromStatus("initial");
 
     const intervalId = setInterval(() => {
-      reconcileLightsFromSnapshot('interval');
+      reconcileLightsFromStatus("interval");
     }, RECONCILE_INTERVAL_MS);
 
     return () => {
       clearInterval(intervalId);
     };
-  }, [reconcileLightsFromSnapshot]);
+  }, [reconcileLightsFromStatus]);
 
   useEffect(
     () => () => {
@@ -156,11 +164,11 @@ export const ActionBar = ({ onDebugUpdate }) => {
   const handleFeed = async () => {
     setLoadingState((prev) => ({ ...prev, feed: true }));
     const result = await feedFish();
-    pushDebug('feed', result);
-    showError(result, 'Feed request failed');
+    pushDebug("feed", result);
+    showError(result, "Feed request failed");
     setLoadingState((prev) => ({ ...prev, feed: false }));
     if (result.ok && result.status === 200) {
-      flashSuccess('feed');
+      flashSuccess("feed");
     }
   };
 
@@ -174,7 +182,7 @@ export const ActionBar = ({ onDebugUpdate }) => {
       requestId: String(Date.now()),
       sentAt: new Date().toISOString(),
     });
-    pushDebug('lights', result);
+    pushDebug("lights", result);
 
     if (result.ok && result.status === 200) {
       setLightsActive(value);
@@ -185,23 +193,26 @@ export const ActionBar = ({ onDebugUpdate }) => {
       setLightsSurfaceActive(lightsActive);
     }
 
-    showError(result, 'Lights request failed');
+    showError(result, "Lights request failed");
     setLoadingState((prev) => ({ ...prev, lights: false }));
   };
 
   const handleClick = async () => {
     setLoadingState((prev) => ({ ...prev, click: true }));
     const result = await cameraClick();
-    pushDebug('snapshot', result);
-    showError(result, 'Camera click failed');
+    pushDebug("snapshot", result);
+    showError(result, "Camera click failed");
     setLoadingState((prev) => ({ ...prev, click: false }));
     if (result.ok && result.status === 200) {
-      flashSuccess('click');
+      flashSuccess("click");
     }
   };
 
   return (
-    <View className="flex-row w-full gap-4" accessibilityLabel="Feed, lights, and camera actions">
+    <View
+      className="flex-row w-full gap-6"
+      accessibilityLabel="Feed, lights, and camera actions"
+    >
       <ActionButton
         label="feed"
         iconKey="feed"
